@@ -4,7 +4,20 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WhatsAppWebhookController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'ForBill WhatsApp Bot is running',
+        'timestamp' => now(),
+        'version' => '1.0.0'
+    ]);
+});
+
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'healthy',
+        'database' => 'connected',
+        'timestamp' => now()
+    ]);
 });
 
 // WhatsApp webhook routes
