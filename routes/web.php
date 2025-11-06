@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\WhatsAppWebhookController;
 
 Route::get('/', function () {
@@ -13,11 +14,37 @@ Route::get('/', function () {
 });
 
 Route::get('/health', function () {
-    return response()->json([
-        'status' => 'healthy',
-        'database' => 'connected',
-        'timestamp' => now()
-    ]);
+    try {
+        // Simple health check without database dependency
+        return response()->json([
+            'status' => 'healthy',
+            'timestamp' => now(),
+            'memory_usage' => memory_get_usage(true),
+            'app_env' => config('app.env')
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
+Route::get('/db-health', function () {
+    try {
+        DB::connection()->getPdo();
+        return response()->json([
+            'status' => 'healthy',
+            'database' => 'connected',
+            'timestamp' => now()
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'database' => 'disconnected',
+            'error' => $e->getMessage()
+        ], 500);
+    }
 });
 
 // WhatsApp webhook routes
